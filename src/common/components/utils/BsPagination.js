@@ -9,8 +9,8 @@ let style = {
   margin: 2,
 };
 
-let Pagination = ({ simple, resourceName, pages, dispatch, ...rest }) => {
-  let page = pages[resourceName] || pages.default;
+let Pagination = ({ simple, resourceName, pagination, dispatch, ...rest }) => {
+  let { page } = pagination[resourceName];
 
   return (
     <nav {...rest}>
@@ -81,8 +81,8 @@ Pagination.propTypes = {
   simple: PropTypes.bool,
 };
 
-export default connect(state => ({
-  pages: state.pages,
+export default connect(({ pagination }) => ({
+  pagination,
 }), null, null, {
   pure: false,
 })(Pagination);

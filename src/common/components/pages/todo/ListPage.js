@@ -11,6 +11,7 @@ import {
   removeTodo,
 } from '../../../actions/todoActions';
 import { setCrrentPage, setPage } from '../../../actions/pageActions';
+import { setTodos } from '../../../actions/entityActions';
 import PageLayout from '../../layouts/PageLayout';
 import Pagination from '../../utils/BsPagination';
 
@@ -89,7 +90,7 @@ class ListPage extends Component {
 
   componentDidMount() {
     let { dispatch, location } = this.props;
-    dispatch(setCrrentPage(Resources.TODO, location.query.page || 1));
+    dispatch(setCrrentPage('todos', location.query.page || 1));
   }
 
   componentDidUpdate(prevProps) {
@@ -103,8 +104,7 @@ class ListPage extends Component {
           throw err;
         })
         .then((json) => {
-          dispatch(setTodo(json.todos));
-          dispatch(setPage(Resources.TODO, json.page));
+          dispatch(setTodos(json));
           dispatch(push({
             pathname: location.pathname,
             query: { page: json.page.current },
@@ -171,14 +171,20 @@ class ListPage extends Component {
               onSaveClick={this.handleSaveClick.bind(this, todo._id)}
               text={todo.text} />)}
         </ul>
-        <Pagination resourceName={Resources.TODO} />
+        <Pagination resourceName="todos" />
       </PageLayout>
     );
   }
 };
 
-export default connect(state => ({
-  apiEngine: state.apiEngine,
-  todos: state.todos,
-  page: state.pages[Resources.TODO] || {},
-}))(ListPage);
+export default connect(({ apiEngine, pagination, entity }) => {
+  let { page } = pagination.todos;
+  let todoPages = pagination.todos.pages[page.current] || { ids: [] };
+  let todos = todoPages.ids.map(id => entity.todos[id]);
+
+  return {
+    apiEngine,
+    todos,
+    page,
+  };
+})(ListPage);
